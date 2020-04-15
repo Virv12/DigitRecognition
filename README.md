@@ -3,6 +3,8 @@ Handwritten digit recognition implemented in c++ without libraries
 
 # Current algorithms
 - [x] k-NN
+- [ ] k-NN with [k-d tree](https://en.wikipedia.org/wiki/K-d_tree)
+- [ ] Deep Neural Network - Backpropagation
 
 # Results
 ## k-NN
