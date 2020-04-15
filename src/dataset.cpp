@@ -1,12 +1,13 @@
 #include <iostream>
 #include <fstream>
+#include <array>
 #include <vector>
 using namespace std;
 
 vector<uint8_t> train_labels;
-vector<uint8_t> train_images;
+vector<array<uint8_t, 28*28>> train_images;
 vector<uint8_t> test_labels;
-vector<uint8_t> test_images;
+vector<array<uint8_t, 28*28>> test_images;
 
 void load_dataset() {
 	ifstream fin;
@@ -47,7 +48,7 @@ void load_dataset() {
 	}
 
 	train_images.resize(N);
-	fin.read((char*)train_images.data(), N * sizeof(uint8_t));
+	fin.read((char*)train_images.data(), N * sizeof(array<uint8_t, 28*28>));
 
 	/*---------------------*\
 	\*---------------------*/
@@ -84,5 +85,5 @@ void load_dataset() {
 	}
 
 	test_images.resize(N);
-	fin.read((char*)test_images.data(), N * sizeof(uint8_t));
+	fin.read((char*)test_images.data(), N * sizeof(array<uint8_t, 28*28>));
 }
