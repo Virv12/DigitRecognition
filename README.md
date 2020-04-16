@@ -13,7 +13,7 @@ Error rate: 2.95%
 
 # Compilation
 ```bash
-make
+make -j4
 ```
 
 Dataset: http://yann.lecun.com/exdb/mnist/

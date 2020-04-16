@@ -1,10 +1,11 @@
 # CC=g++ -std=c++17 -g -Og -Wall -Wextra -Iincludes -D_GLIBCXX_DEBUG -fsanitize=address
 CC=g++ -std=c++17 -Ofast -Wall -Wextra -Iincludes
 DATASET=$(addprefix dataset/,t10k-labels-idx1-ubyte train-images-idx3-ubyte train-labels-idx1-ubyte t10k-images-idx3-ubyte)
+BINARY=$(addprefix bin/,k-NN)
 
-all: k-NN $(DATASET)
+all: $(BINARY) $(DATASET)
 
-k-NN: $(addprefix obj/,k-NN.o dataset.o)
+bin/k-NN: $(addprefix obj/,k-NN.o dataset.o) | bin/
 	$(CC) -o $@ $^
 
 obj/%.o: src/%.cpp | obj/
@@ -18,7 +19,7 @@ $(DATASET): dataset/% : | dataset/
 	mkdir -p $*
 
 clean:
-	rm -rf obj dataset k-NN
+	rm -rf obj dataset bin
 
 .PHONY: run clean
 .SECONDARY:
