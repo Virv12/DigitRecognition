@@ -5,7 +5,9 @@ BINARY=$(addprefix bin/,k-NN)
 
 all: $(BINARY) $(DATASET)
 
-bin/k-NN: $(addprefix obj/,k-NN.o dataset.o) | bin/
+bin/k-NN: $(addprefix obj/,k-NN.o dataset.o)
+
+$(BINARY): bin/% : | bin/
 	$(CC) -o $@ $^
 
 obj/%.o: src/%.cpp | obj/
