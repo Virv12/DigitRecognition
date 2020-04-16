@@ -14,7 +14,7 @@ obj/%.o: src/%.cpp | obj/
 	$(CC) -c -o $@ $^
 
 $(DATASET): dataset/% : | dataset/
-	curl 'http://yann.lecun.com/exdb/mnist/$*.gz' -o $@.gz
+	curl 'http://yann.lecun.com/exdb/mnist/$*.gz' -o $@.gz 2>/dev/null
 	gunzip $@.gz
 
 %/:
