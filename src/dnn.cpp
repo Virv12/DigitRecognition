@@ -1,6 +1,7 @@
 #include <assert.h>
 #include <math.h>
 
+#include <numeric>
 #include <algorithm>
 #include <array>
 #include <vector>
@@ -24,7 +25,7 @@ struct matrix {
 		delete[] data;
 	}
 
-	inline float* operator[] (size_t i) {
+	inline float* operator[] (const size_t i) const {
 		assert(i < N);
 		return data + i * M;
 	}
@@ -61,7 +62,7 @@ struct NN {
 		return I;
 	}
 
-	void backprop(vector<float> I, vector<float> O) {
+	void backprop(const vector<float>& I, const vector<float>& O) {
 		vector<vector<float>> NN { I };
 
 		for (matrix& m : W) {
@@ -106,7 +107,7 @@ struct NN {
 		for (size_t i = 0; i < W.size(); i++)
 			for (size_t j = 0; j < W[i].N; j++)
 				for (size_t k = 0; k < W[i].M; k++) {
-					W[i][j][k] -= 0.1 * A[i][j][k];
+					W[i][j][k] -= 0.01 * A[i][j][k];
 					A[i][j][k] = 0;
 				}
 	}
@@ -116,25 +117,25 @@ int main() {
 	load_dataset();
 	NN nn({28*28, 16, 16, 10});
 
+	vector<int> S(train_labels.size());
+	iota(S.begin(), S.end(), 0);
+
 	do {
-		for (size_t i = 0; i < train_labels.size(); i++) {
-			vector<float> I(train_images[i].begin(), train_images[i].end());
+		random_shuffle(S.begin(), S.end());
+		for (size_t i = 0; i < S.size(); i++) {
+			vector<float> I(train_images[S[i]].begin(), train_images[S[i]].end());
 			for (float& f : I)
 				f /= 255;
 
 			vector<float> O(10, 0);
-			O[train_labels[i]] = 1;
+			O[train_labels[S[i]]] = 1;
 
 			nn.backprop(I, O);
 
 			if ((i + 1) % 100 == 0)
 				nn.apply();
-
-			if ((i + 1) % 2000 == 0) {
-				printf("%lu / %lu\r", i, train_labels.size());
-				fflush(stdout);
-			}
 		}
+
 
 		size_t C = 0;
 		for (size_t i = 0; i < test_labels.size(); i++) {
@@ -146,6 +147,10 @@ int main() {
 
 			C += max_element(O.begin(), O.end()) - O.begin() == test_labels[i];
 		}
-		printf("%lu / %lu: %f%%\n", C, test_labels.size(), 100.0f * C / test_labels.size());
+		float P = 100.0f * C / test_labels.size();
+		printf("[");
+		for (size_t i = 0; i < 100; i++)
+			printf("%c", i < P ? '#' : ' ');
+		printf("] %.2f%%\n", P);
 	} while (true);
 }
