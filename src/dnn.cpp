@@ -18,7 +18,7 @@ struct matrix {
 	size_t N, M;
 
 	matrix(size_t N, size_t M) : N(N), M(M) {
-		data = new float[N * M] {};
+		data = new float[N * M];
 	}
 
 	~matrix() {
@@ -42,6 +42,11 @@ struct NN {
 		for (size_t i = 1; i < D.size(); i++) {
 			W.emplace_back(D[i], D[i-1] + 1);
 			A.emplace_back(D[i], D[i-1] + 1);
+
+			for (size_t j = 0; j < W.back().N * W.back().M; j++) {
+				W.back().data[j] = (float)rand() / RAND_MAX * 2 - 1;
+				A.back().data[j] = 0;
+			}
 		}
 	}
 
@@ -114,8 +119,10 @@ struct NN {
 };
 
 int main() {
+	srand(time(0));
+
 	load_dataset();
-	NN nn({28*28, 16, 16, 10});
+	NN nn({28*28, 28, 28, 10});
 
 	vector<int> S(train_labels.size());
 	iota(S.begin(), S.end(), 0);
@@ -132,10 +139,9 @@ int main() {
 
 			nn.backprop(I, O);
 
-			if ((i + 1) % 100 == 0)
+			if ((i + 1) % 10 == 0)
 				nn.apply();
 		}
-
 
 		size_t C = 0;
 		for (size_t i = 0; i < test_labels.size(); i++) {
@@ -147,10 +153,11 @@ int main() {
 
 			C += max_element(O.begin(), O.end()) - O.begin() == test_labels[i];
 		}
+
 		float P = 100.0f * C / test_labels.size();
 		printf("[");
 		for (size_t i = 0; i < 100; i++)
-			printf("%c", i < P ? '#' : ' ');
+			printf("%c", i < (P - 90) * 10 ? '#' : ' ');
 		printf("] %.2f%%\n", P);
 	} while (true);
 }
