@@ -5,15 +5,18 @@ Handwritten digit recognition implemented in c++ without libraries
 - [x] k-NN
 - [ ] k-NN with [k-d tree](https://en.wikipedia.org/wiki/K-d_tree)
 - [x] Deep Neural Network - Backpropagation
-- [ ] Convolutional Neural Network
+- [x] Convolutional Neural Network
 
 # Results
 ## k-NN
 Best result with 3 closest neighbours from a 60000 images dataset.  
 Error rate: 2.95%
 
-# dnn
+# Deep Neural Network
 Error rate: 3.87%
+
+# Convolutional Neural Network
+Error rate: 3.61%
 
 # Compilation
 ```bash

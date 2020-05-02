@@ -12,14 +12,23 @@ using namespace std;
 
 int main() {
 	srand(time(0));
-
 	load_dataset();
+
+	// NN nn {
+	// 	new LayerLinear(28*28, 28),
+	// 	new LayerSigmoid,
+	// 	new LayerLinear(28   , 28),
+	// 	new LayerSigmoid,
+	// 	new LayerLinear(28   , 10),
+	// 	new LayerSigmoid,
+	// };
+	
 	NN nn {
-		new LayerLinear(28*28, 28),
+		new LayerAveragePooling({14, 14}, {2, 2}),
+		new LayerConvolutional(1, 2, {10, 10}, {5, 5}),
 		new LayerSigmoid,
-		new LayerLinear(28   , 28),
-		new LayerSigmoid,
-		new LayerLinear(28   , 10),
+
+		new LayerLinear(2*10*10, 10),
 		new LayerSigmoid,
 	};
 
@@ -40,6 +49,11 @@ int main() {
 
 			if ((i + 1) % 10 == 0)
 				nn.apply();
+
+			if ((i + 1) % 500 == 0) {
+				printf("%lu / %lu\r", i+1, S.size());
+				fflush(stdout);
+			}
 		}
 
 		size_t C = 0;
