@@ -14,26 +14,34 @@ int main() {
 	srand(time(0));
 	load_dataset();
 
-	// NN nn {
-	// 	new LayerLinear(28*28, 28),
-	// 	new LayerSigmoid,
-	// 	new LayerLinear(28   , 28),
-	// 	new LayerSigmoid,
-	// 	new LayerLinear(28   , 10),
-	// 	new LayerSigmoid,
-	// };
-	
 	NN nn {
-		new LayerAveragePooling({14, 14}, {2, 2}),
-		new LayerConvolutional(1, 2, {10, 10}, {5, 5}),
+		new LayerLinear(28*28, 28),
 		new LayerSigmoid,
-
-		new LayerLinear(2*10*10, 10),
+		new LayerLinear(28   , 28),
+		new LayerSigmoid,
+		new LayerLinear(28   , 10),
 		new LayerSigmoid,
 	};
+	
+	// NN nn {
+	// 	new LayerConvolutional(1, 20, {24, 24}, {5, 5}),
+	// 	new LayerSigmoid,
+	// 	new LayerAveragePooling({12, 12}, {2, 2}),
+
+	// 	new LayerConvolutional(20, 40, {9, 9}, {4, 4}),
+	// 	new LayerSigmoid,
+	// 	new LayerAveragePooling({3, 3}, {3, 3}),
+
+	// 	new LayerLinear(40*3*3, 150),
+	// 	new LayerSigmoid,
+	// 	new LayerLinear(150, 10),
+	// 	new LayerSigmoid,
+	// };
 
 	vector<int> S(train_labels.size());
 	iota(S.begin(), S.end(), 0);
+
+	size_t M = 0;
 
 	do {
 		random_shuffle(S.begin(), S.end());
@@ -66,6 +74,9 @@ int main() {
 
 			C += max_element(O.begin(), O.end()) - O.begin() == test_labels[i];
 		}
+
+		if (C > M)
+			nn.save("nn.bin");
 
 		float P = 100.0f * C / test_labels.size();
 		printf("[");

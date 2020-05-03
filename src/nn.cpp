@@ -1,9 +1,21 @@
 #include <cassert>
 #include <cmath>
 #include <vector>
+#include <fstream>
 
-#include <nn.h>
+// #include <nn.h>
+#include "../includes/nn.h"
 using namespace std;
+
+Layer* Layer::fromFile(int idx, ifstream& fin) {
+	switch (idx) {
+		case 0: puts("LayerLinear"); return new LayerLinear(fin);
+		case 1: puts("LayerSigmoid"); return new LayerSigmoid;
+		case 2: puts("LayerAveragePooling"); return new LayerAveragePooling(fin);
+		case 3: puts("LayerConvolutional"); return new LayerConvolutional(fin);
+		default: assert(false); return nullptr;
+	}
+}
 
 LayerLinear::LayerLinear(size_t I, size_t O) : I(I), O(O) {
 	size_t T = (I + 1) * O;
@@ -16,6 +28,23 @@ LayerLinear::LayerLinear(size_t I, size_t O) : I(I), O(O) {
 LayerLinear::~LayerLinear() {
 	delete[] W;
 	delete[] A;
+}
+
+LayerLinear::LayerLinear(ifstream& fin) {
+	fin.read((char*)&I, sizeof(I));
+	fin.read((char*)&O, sizeof(O));
+
+	size_t T = O * (I + 1);
+	W = new float[T];
+	A = new float[T] {};
+	fin.read((char*)W, T * sizeof(*W));
+}
+
+void LayerLinear::save(ofstream& fout) {
+	fout.write("\000", 1);
+	fout.write((char*)&I, sizeof(I));
+	fout.write((char*)&O, sizeof(O));
+	fout.write((char*)W, O * (I + 1) * sizeof(*W));
 }
 
 vector<float> LayerLinear::operator() (vector<float>& m) {
@@ -53,6 +82,10 @@ void LayerLinear::apply() {
 	}
 }
 
+void LayerSigmoid::save(ofstream& fout) {
+	fout.write("\001", 1);
+}
+
 vector<float> LayerSigmoid::operator() (vector<float>& m) {
 	for (size_t i = 0; i < m.size(); i++)
 		m[i] = 1 / (1 + exp(-m[i]));
@@ -66,6 +99,15 @@ vector<float> LayerSigmoid::backprop(vector<float>& m, vector<float>& c, const v
 	for (size_t i = 0; i < m.size(); i++)
 		m[i] *= c[i] * (1 - c[i]);
 	return m;
+}
+
+LayerAveragePooling::LayerAveragePooling(ifstream& fin) {
+	fin.read((char*)this, sizeof(this));
+}
+
+void LayerAveragePooling::save(ofstream& fout) {
+	fout.write("\002", 1);
+	fout.write((char*)this, sizeof(this));
 }
 
 vector<float> LayerAveragePooling::operator() (vector<float>& m) {
@@ -98,13 +140,37 @@ vector<float> LayerAveragePooling::backprop(vector<float>& m, vector<float>&, co
 
 LayerConvolutional::LayerConvolutional(size_t I, size_t O, array<size_t, 2> S, array<size_t, 2> K)
 	: I(I), O(O), S(S), K(K) {
-		W = new float[O * (I * K[0] * K[1] + 1)];
-		A = new float[O * (I * K[0] * K[1] + 1)];
+		size_t T = O * (I * K[0] * K[1] + 1);
+		W = new float[T];
+		A = new float[T] {};
+		for (size_t i = 0; i < T; i++)
+			W[i] = (float)rand() / RAND_MAX * 2 - 1;
 }
 
 LayerConvolutional::~LayerConvolutional() {
 	delete[] W;
 	delete[] A;
+}
+
+LayerConvolutional::LayerConvolutional(ifstream& fin) {
+	fin.read((char*)&I, sizeof(I));
+	fin.read((char*)&O, sizeof(O));
+	fin.read((char*)&S, sizeof(S));
+	fin.read((char*)&K, sizeof(K));
+
+	size_t T = O * (I * K[0] * K[1] + 1);
+	W = new float[T];
+	A = new float[T] {};
+	fin.read((char*)W, T * sizeof(*W));
+}
+
+void LayerConvolutional::save(ofstream& fout) {
+	fout.write("\003", 1);
+	fout.write((char*)&I, sizeof(I));
+	fout.write((char*)&O, sizeof(O));
+	fout.write((char*)&S, sizeof(S));
+	fout.write((char*)&K, sizeof(K));
+	fout.write((char*)W, O * (I * K[0] * K[1] + 1) * sizeof(*W));
 }
 
 vector<float> LayerConvolutional::operator() (vector<float>& m) {
@@ -165,6 +231,11 @@ void LayerConvolutional::apply() {
 
 NN::NN(initializer_list<Layer*> il) : layers(il) {}
 
+NN::~NN() {
+	for (Layer* l : layers)
+		delete l;
+}
+
 vector<float> NN::operator() (vector<float> I) {
 	for (Layer* l : layers)
 		I = (*l)(I);
@@ -192,4 +263,19 @@ void NN::backprop(vector<float> I, const vector<float>& O) {
 void NN::apply() {
 	for (Layer* l : layers)
 		l->apply();
+}
+
+void NN::save(string path) {
+	ofstream fout(path);
+	for (Layer* l : layers)
+		l->save(fout);
+	fout.close();
+}
+
+NN::NN(string path) {
+	ifstream fin(path);
+	char c;
+	while (c = fin.get(), !fin.eof()) 
+		layers.emplace_back(Layer::fromFile(c, fin));
+	fin.close();
 }
