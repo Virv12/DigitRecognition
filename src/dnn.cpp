@@ -75,8 +75,10 @@ int main() {
 			C += max_element(O.begin(), O.end()) - O.begin() == test_labels[i];
 		}
 
-		if (C > M)
+		if (C > M) {
 			nn.save("nn.bin");
+			M = C;
+		}
 
 		float P = 100.0f * C / test_labels.size();
 		printf("[");
