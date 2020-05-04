@@ -16,9 +16,7 @@ Error rate: 2.95%
 Error rate: 3.87%
 
 # Convolutional Neural Network
-Error rate: 3.61%
-96.80%
-97.87%
+Error rate: 0.70%
 
 # Compilation
 ```bash

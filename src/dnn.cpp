@@ -14,7 +14,7 @@ int main() {
 	srand(time(0));
 	load_dataset();
 
-	NN nn {
+	NN nn { // Error rate: 3.87%
 		new LayerLinear(28*28, 28),
 		new LayerSigmoid,
 		new LayerLinear(28   , 28),
@@ -23,7 +23,7 @@ int main() {
 		new LayerSigmoid,
 	};
 	
-	// NN nn {
+	// NN nn { // Error rate: 0.70%
 	// 	new LayerConvolutional(1, 20, {24, 24}, {5, 5}),
 	// 	new LayerSigmoid,
 	// 	new LayerAveragePooling({12, 12}, {2, 2}),
