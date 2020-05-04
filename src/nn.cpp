@@ -102,12 +102,14 @@ vector<float> LayerSigmoid::backprop(vector<float>& m, vector<float>& c, const v
 }
 
 LayerAveragePooling::LayerAveragePooling(ifstream& fin) {
-	fin.read((char*)this, sizeof(this));
+	fin.read((char*)&D, sizeof(D));
+	fin.read((char*)&S, sizeof(S));
 }
 
 void LayerAveragePooling::save(ofstream& fout) {
 	fout.write("\002", 1);
-	fout.write((char*)this, sizeof(this));
+	fout.write((char*)&D, sizeof(D));
+	fout.write((char*)&S, sizeof(S));
 }
 
 vector<float> LayerAveragePooling::operator() (vector<float>& m) {
@@ -237,8 +239,10 @@ NN::~NN() {
 }
 
 vector<float> NN::operator() (vector<float> I) {
-	for (Layer* l : layers)
+	for (Layer* l : layers) {
+		assert(l);
 		I = (*l)(I);
+	}
 	return I;
 }
 
@@ -275,7 +279,10 @@ void NN::save(string path) {
 NN::NN(string path) {
 	ifstream fin(path);
 	char c;
-	while (c = fin.get(), !fin.eof()) 
-		layers.emplace_back(Layer::fromFile(c, fin));
+	while (c = fin.get(), !fin.eof()) {
+		Layer* l = Layer::fromFile(c, fin);
+		assert(l);
+		layers.push_back(l);
+	}
 	fin.close();
 }
