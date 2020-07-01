@@ -2,6 +2,8 @@
 #include <fstream>
 #include <array>
 #include <vector>
+
+#include <dataset.h>
 using namespace std;
 
 vector<uint8_t> train_labels;
