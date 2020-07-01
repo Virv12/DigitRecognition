@@ -18,7 +18,7 @@ struct LayerLinear : Layer {
 	float *W, *A;
 
 	LayerLinear(size_t I, size_t O);
-	~LayerLinear();
+	~LayerLinear() override;
 
 	LayerLinear(std::ifstream&);
 	virtual void save(std::ofstream&) override;
@@ -53,7 +53,7 @@ struct LayerConvolutional : Layer {
 	float *W, *A;
 
 	LayerConvolutional(size_t, size_t, std::array<size_t, 2>, std::array<size_t, 2>);
-	~LayerConvolutional();
+	~LayerConvolutional() override;
 
 	LayerConvolutional(std::ifstream&);
 	virtual void save(std::ofstream&) override;

@@ -3,16 +3,15 @@
 #include <vector>
 #include <fstream>
 
-// #include <nn.h>
-#include "../includes/nn.h"
+#include <nn.h>
 using namespace std;
 
 Layer* Layer::fromFile(int idx, ifstream& fin) {
 	switch (idx) {
-		case 0: puts("LayerLinear"); return new LayerLinear(fin);
-		case 1: puts("LayerSigmoid"); return new LayerSigmoid;
-		case 2: puts("LayerAveragePooling"); return new LayerAveragePooling(fin);
-		case 3: puts("LayerConvolutional"); return new LayerConvolutional(fin);
+		case 0: return new LayerLinear(fin);
+		case 1: return new LayerSigmoid;
+		case 2: return new LayerAveragePooling(fin);
+		case 3: return new LayerConvolutional(fin);
 		default: assert(false); return nullptr;
 	}
 }
